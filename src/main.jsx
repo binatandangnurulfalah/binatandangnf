@@ -10,12 +10,25 @@ const emptyProfile = { name: "Yayasan Bina Tandang Nurul Falah", tagline: "", sh
 
 function App() {
   const [session, setSession] = useState(null), [email, setEmail] = useState(""), [password, setPassword] = useState(""), [message, setMessage] = useState("");
+  const [recoveryMode, setRecoveryMode] = useState(false), [newPassword, setNewPassword] = useState(""), [confirmPassword, setConfirmPassword] = useState(""), [updatingPassword, setUpdatingPassword] = useState(false);
   const [tab, setTab] = useState("articles"), [articles, setArticles] = useState([]), [announcements, setAnnouncements] = useState([]);
   const [article, setArticle] = useState(emptyArticle), [announcement, setAnnouncement] = useState(emptyAnnouncement), [profile, setProfile] = useState(emptyProfile);
   const [editingId, setEditingId] = useState(null), [editingAnnouncementId, setEditingAnnouncementId] = useState(null), [profileId, setProfileId] = useState(null), [saving, setSaving] = useState(false), [uploading, setUploading] = useState(false);
 
-  useEffect(() => { supabase.auth.getSession().then(({ data }) => setSession(data.session)); const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => setSession(s)); return () => subscription.unsubscribe(); }, []);
-  useEffect(() => { if (session) loadDashboard(); }, [session]);
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash.includes("error=access_denied")) {
+      const params = new URLSearchParams(hash.slice(1));
+      setMessage(params.get("error_description") ? decodeURIComponent(params.get("error_description")).replace(/\+/g, " ") : "Link reset password tidak valid atau sudah kedaluwarsa.");
+    }
+    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
+      setSession(s);
+      if (event === "PASSWORD_RECOVERY") { setRecoveryMode(true); setMessage(""); }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+  useEffect(() => { if (session && !recoveryMode) loadDashboard(); }, [session, recoveryMode]);
 
   async function loadDashboard() {
     const [{ data: a, error: ae }, { data: n, error: ne }, { data: p, error: pe }] = await Promise.all([
@@ -28,6 +41,19 @@ function App() {
   }
 
   async function login(e) { e.preventDefault(); setMessage(""); const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) setMessage(error.message); }
+
+  async function updatePassword(e) {
+    e.preventDefault();
+    setMessage("");
+    if (newPassword.length < 8) { setMessage("Password baru minimal 8 karakter."); return; }
+    if (newPassword !== confirmPassword) { setMessage("Konfirmasi password tidak sama."); return; }
+    setUpdatingPassword(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setUpdatingPassword(false);
+    if (error) { setMessage(error.message); return; }
+    setNewPassword(""); setConfirmPassword(""); setRecoveryMode(false); setMessage("Password berhasil diperbarui. Anda sekarang masuk ke dashboard.");
+    window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+  }
 
   async function uploadFile(file, bucket, prefix) {
     if (!file) return null;
@@ -66,6 +92,7 @@ function App() {
   async function deleteArticle(id) { if (!confirm("Hapus artikel ini?")) return; const { error } = await supabase.from("articles").delete().eq("id", id); if (error) setMessage(error.message); else { await loadDashboard(); setMessage("Artikel dihapus."); } }
   async function deleteAnnouncement(id) { if (!confirm("Hapus pengumuman ini?")) return; const { error } = await supabase.from("announcements").delete().eq("id", id); if (error) setMessage(error.message); else { await loadDashboard(); setMessage("Pengumuman dihapus."); } }
 
+  if (recoveryMode) return <main className="login"><section className="card"><h1>Reset Password</h1><p>Yayasan Bina Tandang Nurul Falah</p><form onSubmit={updatePassword}><input type="password" placeholder="Password baru" value={newPassword} onChange={e => setNewPassword(e.target.value)} minLength="8" required /><input type="password" placeholder="Ulangi password baru" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} minLength="8" required /><button disabled={updatingPassword}>{updatingPassword ? "Memperbarui…" : "Simpan Password Baru"}</button></form>{message && <p className="error">{message}</p>}<p style={{ fontSize: "0.9rem", marginTop: "1rem" }}>Gunakan minimal 8 karakter.</p></section></main>;
   if (!session) return <main className="login"><section className="card"><h1>Admin Yayasan</h1><p>Yayasan Bina Tandang Nurul Falah</p><form onSubmit={login}><input type="email" placeholder="Email admin" value={email} onChange={e => setEmail(e.target.value)} required /><input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required /><button>Masuk</button></form>{message && <p className="error">{message}</p>}</section></main>;
 
   return <main>

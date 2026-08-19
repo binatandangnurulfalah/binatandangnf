@@ -9,11 +9,26 @@ const emptyAnnouncement = { title: "", content: "", type: "text", banner_image_u
 const emptyProfile = { name: "Yayasan Bina Tandang Nurul Falah", tagline: "", short_description: "", full_description: "", vision: "", mission: "", address: "", phone: "", email: "", social_links: "{}" };
 
 function App() {
-  const [session, setSession] = useState(null), [email, setEmail] = useState(""), [password, setPassword] = useState(""), [message, setMessage] = useState("");
+  const [session, setSession] = useState(null), [isAdmin, setIsAdmin] = useState(null), [email, setEmail] = useState(""), [password, setPassword] = useState(""), [message, setMessage] = useState("");
   const [recoveryMode, setRecoveryMode] = useState(false), [resetMode, setResetMode] = useState(false), [newPassword, setNewPassword] = useState(""), [confirmPassword, setConfirmPassword] = useState(""), [resetEmail, setResetEmail] = useState(""), [updatingPassword, setUpdatingPassword] = useState(false), [sendingReset, setSendingReset] = useState(false);
   const [tab, setTab] = useState("articles"), [articles, setArticles] = useState([]), [announcements, setAnnouncements] = useState([]);
   const [article, setArticle] = useState(emptyArticle), [announcement, setAnnouncement] = useState(emptyAnnouncement), [profile, setProfile] = useState(emptyProfile);
   const [editingId, setEditingId] = useState(null), [editingAnnouncementId, setEditingAnnouncementId] = useState(null), [profileId, setProfileId] = useState(null), [saving, setSaving] = useState(false), [uploading, setUploading] = useState(false);
+
+  async function verifyAdmin(s) {
+    if (!s) { setSession(null); setIsAdmin(false); return false; }
+    const { data, error } = await supabase.rpc("is_admin");
+    if (error || data !== true) {
+      await supabase.auth.signOut({ scope: "local" });
+      setSession(null);
+      setIsAdmin(false);
+      setMessage(error ? `Gagal memeriksa akses admin: ${error.message}` : "Akun ini tidak memiliki akses admin.");
+      return false;
+    }
+    setSession(s);
+    setIsAdmin(true);
+    return true;
+  }
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -21,16 +36,24 @@ function App() {
       const params = new URLSearchParams(hash.slice(1));
       setMessage(params.get("error_description") ? decodeURIComponent(params.get("error_description")).replace(/\+/g, " ") : "Link reset password tidak valid atau sudah kedaluwarsa.");
     }
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    supabase.auth.getSession().then(({ data }) => verifyAdmin(data.session));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
-      setSession(s);
-      if (event === "SIGNED_IN") { setMessage(""); }
-      if (event === "SIGNED_OUT") { setMessage(""); setRecoveryMode(false); setResetMode(false); }
-      if (event === "PASSWORD_RECOVERY") { setRecoveryMode(true); setResetMode(false); setMessage(""); }
+      if (event === "SIGNED_OUT") {
+        setSession(null); setIsAdmin(false); setMessage(""); setRecoveryMode(false); setResetMode(false); return;
+      }
+      if (event === "PASSWORD_RECOVERY") {
+        verifyAdmin(s).then(ok => { if (ok) { setRecoveryMode(true); setResetMode(false); setMessage(""); } });
+        return;
+      }
+      if (event === "SIGNED_IN") {
+        verifyAdmin(s).then(ok => { if (ok) setMessage(""); });
+        return;
+      }
+      if (s) verifyAdmin(s);
     });
     return () => subscription.unsubscribe();
   }, []);
-  useEffect(() => { if (session && !recoveryMode) loadDashboard(); }, [session, recoveryMode]);
+  useEffect(() => { if (session && isAdmin && !recoveryMode) loadDashboard(); }, [session, isAdmin, recoveryMode]);
 
   async function loadDashboard() {
     const [{ data: a, error: ae }, { data: n, error: ne }, { data: p, error: pe }] = await Promise.all([
@@ -108,6 +131,7 @@ function App() {
   if (recoveryMode) return <main className="login"><section className="card"><h1>Reset Password</h1><p>Yayasan Bina Tandang Nurul Falah</p><form onSubmit={updatePassword}><input type="password" placeholder="Password baru" value={newPassword} onChange={e => setNewPassword(e.target.value)} minLength="8" required /><input type="password" placeholder="Ulangi password baru" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} minLength="8" required /><button disabled={updatingPassword}>{updatingPassword ? "Memperbarui…" : "Simpan Password Baru"}</button></form>{message && <p className="error">{message}</p>}<p style={{ fontSize: "0.9rem", marginTop: "1rem" }}>Gunakan minimal 8 karakter.</p></section></main>;
   if (resetMode) return <main className="login"><section className="card"><h1>Lupa Password</h1><p>Masukkan email admin untuk menerima link reset password.</p><form onSubmit={sendResetEmail}><input type="email" placeholder="Email admin" value={resetEmail} onChange={e => setResetEmail(e.target.value)} required /><button disabled={sendingReset}>{sendingReset ? "Mengirim…" : "Kirim Link Reset"}</button></form>{message && <p className={message.includes("sudah dikirim") ? "notice" : "error"}>{message}</p>}<button type="button" className="secondary" onClick={() => { setResetMode(false); setMessage(""); }}>Kembali ke Login</button></section></main>;
   if (!session) return <main className="login"><section className="card"><h1>Admin Yayasan</h1><p>Yayasan Bina Tandang Nurul Falah</p><form onSubmit={login}><input type="email" placeholder="Email admin" value={email} onChange={e => setEmail(e.target.value)} required /><input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required /><button>Masuk</button></form><button type="button" className="secondary" onClick={() => { setResetMode(true); setResetEmail(email); setMessage(""); }}>Lupa password?</button>{message && <p className="error">{message}</p>}</section></main>;
+  if (isAdmin === null) return <main className="login"><section className="card"><h1>Memeriksa akses…</h1><p>Memverifikasi akun admin.</p></section></main>;
 
   return <main>
     <header><div><h1>Dashboard CMS</h1><p>Yayasan Bina Tandang Nurul Falah</p></div><button onClick={() => supabase.auth.signOut()}>Keluar</button></header>

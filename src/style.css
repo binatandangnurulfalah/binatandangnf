@@ -1,4 +1,4 @@
-﻿* { box-sizing: border-box; }
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -36,14 +36,19 @@ form {
   margin-top: 24px;
 }
 
-input, button {
+input, textarea, select, button {
   font: inherit;
   padding: 12px 14px;
   border-radius: 10px;
 }
 
-input {
+input, textarea, select {
   border: 1px solid #ccd5d0;
+  background: white;
+}
+
+textarea {
+  resize: vertical;
 }
 
 button {
@@ -54,11 +59,60 @@ button {
   font-weight: 700;
 }
 
+button:disabled {
+  opacity: .65;
+  cursor: wait;
+}
+
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 28px;
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-brand img {
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.admin-brand h1 {
+  margin: 0;
+}
+
+.admin-brand p {
+  margin: 6px 0 0;
+  color: #65716c;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tabs button {
+  border-radius: 10px;
+}
+
+.tabs button.active {
+  background: #0e5d48;
+}
+
+.tabs .public-view {
+  margin-left: auto;
+  background: #e8efe9;
+  color: #18322a;
+  border: 1px solid #cbd9d1;
 }
 
 .stats {
@@ -105,7 +159,41 @@ small {
   color: #b42318;
 }
 
+.notice {
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  border-radius: 10px;
+  background: #e8efe9;
+  color: #18322a;
+}
+
+.secondary {
+  background: #e8efe9;
+  color: #18322a;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.danger {
+  background: #b42318;
+}
+
+.preview {
+  max-width: 280px;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
 @media (max-width: 700px) {
+  main {
+    padding: 20px;
+  }
+
   .grid, .stats {
     grid-template-columns: 1fr;
   }
@@ -113,5 +201,14 @@ small {
   header {
     align-items: flex-start;
     gap: 16px;
+  }
+
+  .admin-brand img {
+    width: 52px;
+    height: 52px;
+  }
+
+  .tabs .public-view {
+    margin-left: 0;
   }
 }

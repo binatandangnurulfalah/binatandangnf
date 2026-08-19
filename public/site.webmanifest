@@ -8,7 +8,7 @@
   "theme_color": "#18322a",
   "icons": [
     {
-      "src": "./logo-yayasan.svg?v=3",
+      "src": "https://msymqqryppgohsjmdbe.supabase.co/storage/v1/object/public/LogoYayasan/LogoYayasan.svg?v=20260820-4",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"

@@ -1,18 +1,15 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { access } from "node:fs/promises";
 
-const logoUrl = "https://msymqqryppgohsjmdbeo.supabase.co/storage/v1/object/public/LogoYayasan/LogoYayasan.svg?v=2";
-const output = "public/logo-yayasan.svg";
+// Logo yayasan sudah disimpan di repository agar proses build/deploy
+// tidak bergantung pada Supabase atau koneksi internet eksternal.
+const embeddedLogo = "public/logo-yayasan.svg";
 
-const response = await fetch(logoUrl);
-if (!response.ok) {
-  throw new Error(`Gagal mengambil logo yayasan: ${response.status} ${response.statusText}`);
+try {
+  await access(embeddedLogo);
+  console.log(`Logo yayasan lokal siap: ${embeddedLogo}`);
+} catch {
+  throw new Error(
+    `Logo yayasan lokal tidak ditemukan: ${embeddedLogo}. ` +
+    "Pastikan asset logo resmi tersimpan di repository sebelum build."
+  );
 }
-
-const svg = await response.text();
-if (!svg.includes("<svg")) {
-  throw new Error("Asset logo yang diterima bukan SVG yang valid.");
-}
-
-await mkdir("public", { recursive: true });
-await writeFile(output, svg, "utf8");
-console.log(`Logo yayasan disematkan ke ${output}`);

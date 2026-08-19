@@ -8,8 +8,8 @@
   "theme_color": "#18322a",
   "icons": [
     {
-      "src": "/favicon.svg?v=20260820-7",
-      "sizes": "512x512",
+      "src": "https://msymqqryppgohsjmdbe2.supabase.co/storage/v1/object/public/LogoYayasan/LogoYayasan.svg?v=2",
+      "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }

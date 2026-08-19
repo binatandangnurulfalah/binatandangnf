@@ -30,6 +30,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Build the latest main branch, including the password-reset flow.
       - name: Build
         run: npm run build
         env:

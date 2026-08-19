@@ -1,19 +1,162 @@
-import React,{useEffect,useState} from 'react';
-import {createRoot} from 'react-dom/client';
-import {createClient} from '@supabase/supabase-js';
-import './style.css';
+﻿import React, { useEffect, useState } from "react";
+import { createRoot } from "react-dom/client";
+import { createClient } from "@supabase/supabase-js";
+import "./style.css";
 
-const supabaseUrl=import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-const supabase=supabaseUrl&&supabaseKey?createClient(supabaseUrl,supabaseKey):null;
-const adminEmail='binatandangnurulfalah.official@gmail.com';
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+);
 
-function Login({onLogin}){const [email,setEmail]=useState(adminEmail),[password,setPassword]=useState(''),[error,setError]=useState(''),[loading,setLoading]=useState(false);
-async function submit(e){e.preventDefault();setError('');if(!supabase){setError('Konfigurasi Supabase belum tersedia.');return}setLoading(true);const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error){setError(error.message);setLoading(false);return}const {data:row}=await supabase.from('admins').select('user_id,full_name').eq('user_id',data.user.id).maybeSingle();if(!row){await supabase.auth.signOut();setError('Akun ini belum memiliki akses admin.');setLoading(false);return}onLogin(data.user,row);}
-return <main className="center"><form className="card login" onSubmit={submit}><div className="mark">BNF</div><h1>Admin Yayasan</h1><p>Yayasan Bina Tandang Nurul Falah</p><label>Email<input value={email} onChange={e=>setEmail(e.target.value)} type="email" required/></label><label>Password<input value={password} onChange={e=>setPassword(e.target.value)} type="password" required/></label>{error&&<div className="error">{error}</div>}<button disabled={loading}>{loading?'Masuk…':'Masuk ke Dashboard'}</button></form></main>}
+function App() {
+  const [session, setSession] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [articles, setArticles] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
 
-function Dashboard({user,onLogout}){const [stats,setStats]=useState({articles:0,published:0,announcements:0});useEffect(()=>{async function load(){const [a,p,n]=await Promise.all([supabase.from('articles').select('*',{count:'exact',head:true}),supabase.from('articles').select('*',{count:'exact',head:true}).eq('status','published'),supabase.from('announcements').select('*',{count:'exact',head:true}).eq('is_active',true)]);setStats({articles:a.count||0,published:p.count||0,announcements:n.count||0})}load()},[]);return <div className="app"><header><div><strong>BNF CMS</strong><span>Yayasan Bina Tandang Nurul Falah</span></div><div className="user">{user.email}<button className="ghost" onClick={onLogout}>Keluar</button></div></header><section className="hero"><h1>Dashboard Admin</h1><p>Kelola konten website yayasan dari satu tempat.</p></section><section className="grid"><div className="stat"><small>Total Artikel</small><b>{stats.articles}</b></div><div className="stat"><small>Artikel Terbit</small><b>{stats.published}</b></div><div className="stat"><small>Pengumuman Aktif</small><b>{stats.announcements}</b></div></section><section className="card"><h2>Modul CMS</h2><div className="modules"><div><b>Profil Yayasan</b><p>Identitas, visi, misi, kontak dan sosial media.</p></div><div><b>Artikel</b><p>Buat draft, terbitkan artikel dan kelola media.</p></div><div><b>Pengumuman</b><p>Kelola teks berjalan dan banner informasi.</p></div><div><b>Tampilan</b><p>Logo, favicon, warna dan pengaturan halaman.</p></div></div></section></div>}
+  async function loadDashboard() {
+    const { data: a } = await supabase
+      .from("articles")
+      .select("id,title,status,created_at")
+      .order("created_at", { ascending: false });
 
-function App(){const [session,setSession]=useState(null);useEffect(()=>{if(!supabase)return;supabase.auth.getSession().then(({data})=>{if(data.session)verify(data.session.user)});const {data}=supabase.auth.onAuthStateChange((_e,s)=>{if(s)verify(s.user);else setSession(null)});return()=>data.subscription.unsubscribe()},[]);async function verify(user){const {data}=await supabase.from('admins').select('user_id,full_name').eq('user_id',user.id).maybeSingle();if(data)setSession({user,row:data});else await supabase.auth.signOut()}async function logout(){await supabase.auth.signOut()}return session?<Dashboard user={session.user} onLogout={logout}/>:<Login onLogin={(user,row)=>setSession({user,row})}/>}
+    const { data: n } = await supabase
+      .from("announcements")
+      .select("id,title,is_active,created_at")
+      .order("created_at", { ascending: false });
 
-createRoot(document.getElementById('root')).render(<App/>);
+    setArticles(a || []);
+    setAnnouncements(n || []);
+  }
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+    });
+
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (session) loadDashboard();
+  }, [session]);
+
+  async function login(event) {
+    event.preventDefault();
+    setMessage("");
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) setMessage(error.message);
+  }
+
+  async function logout() {
+    await supabase.auth.signOut();
+  }
+
+  if (!session) {
+    return (
+      <main className="login">
+        <section className="card">
+          <h1>Admin Yayasan</h1>
+          <p>Yayasan Bina Tandang Nurul Falah</p>
+
+          <form onSubmit={login}>
+            <input
+              type="email"
+              placeholder="Email admin"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+
+            <button type="submit">Masuk</button>
+          </form>
+
+          {message && <p className="error">{message}</p>}
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <main>
+      <header>
+        <div>
+          <h1>Dashboard CMS</h1>
+          <p>Yayasan Bina Tandang Nurul Falah</p>
+        </div>
+        <button onClick={logout}>Keluar</button>
+      </header>
+
+      <section className="stats">
+        <div className="card">
+          <strong>{articles.length}</strong>
+          <span>Artikel</span>
+        </div>
+
+        <div className="card">
+          <strong>{announcements.length}</strong>
+          <span>Pengumuman</span>
+        </div>
+      </section>
+
+      <section className="grid">
+        <div className="card">
+          <h2>Artikel terbaru</h2>
+
+          {articles.length === 0 ? (
+            <p>Belum ada artikel.</p>
+          ) : (
+            <ul>
+              {articles.map((item) => (
+                <li key={item.id}>
+                  <b>{item.title}</b>
+                  <small>{item.status}</small>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="card">
+          <h2>Pengumuman</h2>
+
+          {announcements.length === 0 ? (
+            <p>Belum ada pengumuman.</p>
+          ) : (
+            <ul>
+              {announcements.map((item) => (
+                <li key={item.id}>
+                  <b>{item.title}</b>
+                  <small>{item.is_active ? "Aktif" : "Nonaktif"}</small>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
+    </main>
+  );
+}
+
+createRoot(document.getElementById("root")).render(<App />);

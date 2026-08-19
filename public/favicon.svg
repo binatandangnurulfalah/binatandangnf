@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<title>Logo Yayasan Bina Tandang Nurul Falah</title>
+<rect width="512" height="512" rx="96" fill="#1f4f42"/>
+<path d="M256 34c35 55 87 65 147 79 24 6 39 27 38 52-4 115-46 225-185 300C117 390 75 280 71 165c-1-25 14-46 38-52 60-14 112-24 147-79z" fill="#0c6b42" stroke="#fff" stroke-width="14"/>
+<circle cx="256" cy="252" r="156" fill="#fff" stroke="#111" stroke-width="8"/>
+<g fill="#f47a00"><circle cx="256" cy="117" r="8"/><circle cx="209" cy="126" r="8"/><circle cx="303" cy="126" r="8"/><circle cx="170" cy="151" r="8"/><circle cx="342" cy="151" r="8"/><circle cx="143" cy="190" r="8"/><circle cx="369" cy="190" r="8"/></g>
+<path d="M256 145c-22 30-57 34-78 53 15 12 29 22 39 36-5 7-8 15-8 24 0 26 21 47 47 47s47-21 47-47c0-9-3-17-8-24 10-14 24-24 39-36-21-19-56-23-78-53z" fill="#fff" stroke="#00a33b" stroke-width="12"/>
+<path d="M256 164v115" stroke="#111" stroke-width="8" stroke-linecap="round"/>
+<path d="M203 302h106l-13 24H216z" fill="#111"/>
+<path d="M198 332c20-16 38-17 58 0 20-17 38-16 58 0l-8 56H206z" fill="#fff" stroke="#111" stroke-width="7"/>
+<path d="M207 350c17-9 32-9 49 0 17-9 32-9 49 0" fill="none" stroke="#111" stroke-width="6"/>
+<path d="M120 353l52 76 32-16-43-76zM392 353l-52 76-32-16 43-76z" fill="#fff" stroke="#111" stroke-width="7"/>
+<text x="256" y="447" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#111">BTNF</text>
+</svg>

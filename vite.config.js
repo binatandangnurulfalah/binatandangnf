@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
 
 export default defineConfig({
-  base: '/binatandangnf/',
+  // Relative asset paths work on both Cloudflare root domains and GitHub Pages subpaths.
+  base: './',
   plugins: [react()],
   build: {
     rollupOptions: {

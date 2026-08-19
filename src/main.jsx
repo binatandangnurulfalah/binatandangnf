@@ -4,18 +4,24 @@ import { createClient } from "@supabase/supabase-js";
 import "./style.css";
 
 const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
-
 const emptyArticle = { title: "", subtitle: "", slug: "", content: "", status: "draft", cover_image_url: "", references_text: "" };
+const emptyAnnouncement = { title: "", content: "", type: "text", banner_image_url: "", is_active: true };
+const emptyProfile = { name: "Yayasan Bina Tandang Nurul Falah", tagline: "", short_description: "", full_description: "", vision: "", mission: "", address: "", phone: "", email: "", social_links: "{}" };
 
 function App() {
   const [session, setSession] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [tab, setTab] = useState("articles");
   const [articles, setArticles] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [article, setArticle] = useState(emptyArticle);
+  const [announcement, setAnnouncement] = useState(emptyAnnouncement);
+  const [profile, setProfile] = useState(emptyProfile);
   const [editingId, setEditingId] = useState(null);
+  const [editingAnnouncementId, setEditingAnnouncementId] = useState(null);
+  const [profileId, setProfileId] = useState(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -27,12 +33,18 @@ function App() {
   useEffect(() => { if (session) loadDashboard(); }, [session]);
 
   async function loadDashboard() {
-    const [{ data: a, error: ae }, { data: n, error: ne }] = await Promise.all([
-      supabase.from("articles").select("id,title,status,slug,created_at,updated_at").order("created_at", { ascending: false }),
-      supabase.from("announcements").select("id,title,is_active,created_at").order("created_at", { ascending: false })
+    const [{ data: a, error: ae }, { data: n, error: ne }, { data: p, error: pe }] = await Promise.all([
+      supabase.from("articles").select("id,title,status,slug,created_at,updated_at,subtitle,content,cover_image_url,references_text").order("created_at", { ascending: false }),
+      supabase.from("announcements").select("id,title,content,type,banner_image_url,is_active,start_date,end_date,created_at,updated_at").order("created_at", { ascending: false }),
+      supabase.from("foundation_profile").select("*").order("updated_at", { ascending: false }).limit(1)
     ]);
-    if (ae || ne) setMessage((ae || ne).message);
+    const error = ae || ne || pe;
+    if (error) setMessage(error.message);
     setArticles(a || []); setAnnouncements(n || []);
+    if (p?.[0]) {
+      setProfileId(p[0].id);
+      setProfile({ ...emptyProfile, ...p[0], social_links: typeof p[0].social_links === "string" ? p[0].social_links : JSON.stringify(p[0].social_links || {}, null, 2) });
+    }
   }
 
   async function login(event) {
@@ -44,24 +56,55 @@ function App() {
   async function saveArticle(event) {
     event.preventDefault(); setSaving(true); setMessage("");
     const payload = { ...article, published_at: article.status === "published" ? new Date().toISOString() : null, created_by: session.user.id };
-    const result = editingId
-      ? await supabase.from("articles").update(payload).eq("id", editingId)
-      : await supabase.from("articles").insert(payload);
+    const result = editingId ? await supabase.from("articles").update(payload).eq("id", editingId) : await supabase.from("articles").insert(payload);
     setSaving(false);
     if (result.error) { setMessage(result.error.message); return; }
     setArticle(emptyArticle); setEditingId(null); await loadDashboard(); setMessage("Artikel berhasil disimpan.");
   }
 
+  async function saveAnnouncement(event) {
+    event.preventDefault(); setSaving(true); setMessage("");
+    const result = editingAnnouncementId
+      ? await supabase.from("announcements").update(announcement).eq("id", editingAnnouncementId)
+      : await supabase.from("announcements").insert(announcement);
+    setSaving(false);
+    if (result.error) { setMessage(result.error.message); return; }
+    setAnnouncement(emptyAnnouncement); setEditingAnnouncementId(null); await loadDashboard(); setMessage("Pengumuman berhasil disimpan.");
+  }
+
+  async function saveProfile(event) {
+    event.preventDefault(); setSaving(true); setMessage("");
+    let social_links;
+    try { social_links = JSON.parse(profile.social_links || "{}"); } catch { setSaving(false); setMessage("Social links harus berupa JSON yang valid."); return; }
+    const payload = { ...profile, social_links, updated_at: new Date().toISOString() };
+    delete payload.id; delete payload.created_at;
+    const result = profileId ? await supabase.from("foundation_profile").update(payload).eq("id", profileId) : await supabase.from("foundation_profile").insert(payload);
+    setSaving(false);
+    if (result.error) { setMessage(result.error.message); return; }
+    await loadDashboard(); setMessage("Profil yayasan berhasil disimpan.");
+  }
+
   function editArticle(item) {
     setEditingId(item.id);
     setArticle({ title: item.title || "", subtitle: item.subtitle || "", slug: item.slug || "", content: item.content || "", status: item.status || "draft", cover_image_url: item.cover_image_url || "", references_text: item.references_text || "" });
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setTab("articles"); window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function editAnnouncement(item) {
+    setEditingAnnouncementId(item.id);
+    setAnnouncement({ title: item.title || "", content: item.content || "", type: item.type || "text", banner_image_url: item.banner_image_url || "", is_active: item.is_active ?? true });
   }
 
   async function deleteArticle(id) {
     if (!confirm("Hapus artikel ini?")) return;
     const { error } = await supabase.from("articles").delete().eq("id", id);
-    if (error) setMessage(error.message); else await loadDashboard();
+    if (error) setMessage(error.message); else { await loadDashboard(); setMessage("Artikel dihapus."); }
+  }
+
+  async function deleteAnnouncement(id) {
+    if (!confirm("Hapus pengumuman ini?")) return;
+    const { error } = await supabase.from("announcements").delete().eq("id", id);
+    if (error) setMessage(error.message); else { await loadDashboard(); setMessage("Pengumuman dihapus."); }
   }
 
   if (!session) return <main className="login"><section className="card"><h1>Admin Yayasan</h1><p>Yayasan Bina Tandang Nurul Falah</p><form onSubmit={login}><input type="email" placeholder="Email admin" value={email} onChange={e => setEmail(e.target.value)} required /><input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required /><button>Masuk</button></form>{message && <p className="error">{message}</p>}</section></main>;
@@ -69,18 +112,20 @@ function App() {
   return <main>
     <header><div><h1>Dashboard CMS</h1><p>Yayasan Bina Tandang Nurul Falah</p></div><button onClick={() => supabase.auth.signOut()}>Keluar</button></header>
     {message && <div className="notice">{message}</div>}
+    <nav className="tabs"><button className={tab === "articles" ? "active" : ""} onClick={() => setTab("articles")}>Artikel</button><button className={tab === "announcements" ? "active" : ""} onClick={() => setTab("announcements")}>Pengumuman</button><button className={tab === "profile" ? "active" : ""} onClick={() => setTab("profile")}>Profil Yayasan</button></nav>
     <section className="stats"><div className="card"><strong>{articles.length}</strong><span>Artikel</span></div><div className="card"><strong>{announcements.length}</strong><span>Pengumuman</span></div></section>
-    <section className="card editor"><h2>{editingId ? "Edit artikel" : "Artikel baru"}</h2><form onSubmit={saveArticle}>
-      <input placeholder="Judul" value={article.title} onChange={e => setArticle({ ...article, title: e.target.value })} required />
-      <input placeholder="Slug, contoh: kegiatan-yayasan" value={article.slug} onChange={e => setArticle({ ...article, slug: e.target.value })} required />
-      <input placeholder="Subjudul" value={article.subtitle} onChange={e => setArticle({ ...article, subtitle: e.target.value })} />
-      <input placeholder="URL gambar sampul (opsional)" value={article.cover_image_url} onChange={e => setArticle({ ...article, cover_image_url: e.target.value })} />
-      <textarea placeholder="Isi artikel" rows="10" value={article.content} onChange={e => setArticle({ ...article, content: e.target.value })} required />
-      <textarea placeholder="Referensi" rows="3" value={article.references_text} onChange={e => setArticle({ ...article, references_text: e.target.value })} />
-      <select value={article.status} onChange={e => setArticle({ ...article, status: e.target.value })}><option value="draft">Draft</option><option value="published">Terbit</option></select>
-      <div className="actions"><button disabled={saving}>{saving ? "Menyimpan…" : "Simpan artikel"}</button>{editingId && <button type="button" className="secondary" onClick={() => { setEditingId(null); setArticle(emptyArticle); }}>Batal</button>}</div>
-    </form></section>
-    <section className="card"><h2>Daftar artikel</h2>{articles.length === 0 ? <p>Belum ada artikel.</p> : <ul>{articles.map(item => <li key={item.id}><div><b>{item.title}</b><small>{item.status} · /{item.slug}</small></div><div className="actions"><button onClick={() => editArticle(item)}>Edit</button><button className="danger" onClick={() => deleteArticle(item.id)}>Hapus</button></div></li>)}</ul>}</section>
+
+    {tab === "articles" && <>
+      <section className="card editor"><h2>{editingId ? "Edit artikel" : "Artikel baru"}</h2><form onSubmit={saveArticle}><input placeholder="Judul" value={article.title} onChange={e => setArticle({ ...article, title: e.target.value })} required /><input placeholder="Slug, contoh: kegiatan-yayasan" value={article.slug} onChange={e => setArticle({ ...article, slug: e.target.value })} required /><input placeholder="Subjudul" value={article.subtitle} onChange={e => setArticle({ ...article, subtitle: e.target.value })} /><input placeholder="URL gambar sampul (opsional)" value={article.cover_image_url} onChange={e => setArticle({ ...article, cover_image_url: e.target.value })} /><textarea placeholder="Isi artikel" rows="10" value={article.content} onChange={e => setArticle({ ...article, content: e.target.value })} required /><textarea placeholder="Referensi" rows="3" value={article.references_text} onChange={e => setArticle({ ...article, references_text: e.target.value })} /><select value={article.status} onChange={e => setArticle({ ...article, status: e.target.value })}><option value="draft">Draft</option><option value="published">Terbit</option></select><div className="actions"><button disabled={saving}>{saving ? "Menyimpan…" : "Simpan artikel"}</button>{editingId && <button type="button" className="secondary" onClick={() => { setEditingId(null); setArticle(emptyArticle); }}>Batal</button>}</div></form></section>
+      <section className="card"><h2>Daftar artikel</h2>{articles.length === 0 ? <p>Belum ada artikel.</p> : <ul>{articles.map(item => <li key={item.id}><div><b>{item.title}</b><small>{item.status} · /{item.slug}</small></div><div className="actions"><button onClick={() => editArticle(item)}>Edit</button><button className="danger" onClick={() => deleteArticle(item.id)}>Hapus</button></div></li>)}</ul>}</section>
+    </>}
+
+    {tab === "announcements" && <>
+      <section className="card editor"><h2>{editingAnnouncementId ? "Edit pengumuman" : "Pengumuman baru"}</h2><form onSubmit={saveAnnouncement}><input placeholder="Judul" value={announcement.title} onChange={e => setAnnouncement({ ...announcement, title: e.target.value })} required /><textarea placeholder="Isi pengumuman" rows="6" value={announcement.content} onChange={e => setAnnouncement({ ...announcement, content: e.target.value })} /><select value={announcement.type} onChange={e => setAnnouncement({ ...announcement, type: e.target.value })}><option value="text">Teks</option><option value="running_text">Running text</option><option value="banner">Banner</option></select><input placeholder="URL gambar banner (opsional)" value={announcement.banner_image_url} onChange={e => setAnnouncement({ ...announcement, banner_image_url: e.target.value })} /><label><input type="checkbox" checked={announcement.is_active} onChange={e => setAnnouncement({ ...announcement, is_active: e.target.checked })} /> Aktif</label><div className="actions"><button disabled={saving}>{saving ? "Menyimpan…" : "Simpan pengumuman"}</button>{editingAnnouncementId && <button type="button" className="secondary" onClick={() => { setEditingAnnouncementId(null); setAnnouncement(emptyAnnouncement); }}>Batal</button>}</div></form></section>
+      <section className="card"><h2>Daftar pengumuman</h2>{announcements.length === 0 ? <p>Belum ada pengumuman.</p> : <ul>{announcements.map(item => <li key={item.id}><div><b>{item.title}</b><small>{item.type} · {item.is_active ? "Aktif" : "Nonaktif"}</small></div><div className="actions"><button onClick={() => editAnnouncement(item)}>Edit</button><button className="danger" onClick={() => deleteAnnouncement(item.id)}>Hapus</button></div></li>)}</ul>}</section>
+    </>}
+
+    {tab === "profile" && <section className="card editor"><h2>Profil Yayasan</h2><form onSubmit={saveProfile}><input placeholder="Nama yayasan" value={profile.name} onChange={e => setProfile({ ...profile, name: e.target.value })} required /><input placeholder="Tagline" value={profile.tagline} onChange={e => setProfile({ ...profile, tagline: e.target.value })} /><textarea placeholder="Deskripsi singkat" rows="4" value={profile.short_description} onChange={e => setProfile({ ...profile, short_description: e.target.value })} /><textarea placeholder="Deskripsi lengkap" rows="6" value={profile.full_description} onChange={e => setProfile({ ...profile, full_description: e.target.value })} /><textarea placeholder="Visi" rows="4" value={profile.vision} onChange={e => setProfile({ ...profile, vision: e.target.value })} /><textarea placeholder="Misi" rows="6" value={profile.mission} onChange={e => setProfile({ ...profile, mission: e.target.value })} /><textarea placeholder="Alamat" rows="3" value={profile.address} onChange={e => setProfile({ ...profile, address: e.target.value })} /><input placeholder="Telepon" value={profile.phone} onChange={e => setProfile({ ...profile, phone: e.target.value })} /><input type="email" placeholder="Email" value={profile.email} onChange={e => setProfile({ ...profile, email: e.target.value })} /><textarea placeholder='Social links JSON, contoh: {"facebook":"...","instagram":"..."}' rows="5" value={profile.social_links} onChange={e => setProfile({ ...profile, social_links: e.target.value })} /><button disabled={saving}>{saving ? "Menyimpan…" : "Simpan profil"}</button></form></section>}
   </main>;
 }
 

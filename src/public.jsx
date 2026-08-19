@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
-const logoUrl = `${import.meta.env.BASE_URL}logo-yayasan.svg`;
+const logoUrl = "https://msymqqryppgohsjmdbeo.supabase.co/storage/v1/object/public/LogoYayasan/LogoYayasan.svg?v=2";
 
 function PublicSite() {
   const [profile, setProfile] = useState(null);
@@ -52,7 +52,7 @@ function PublicSite() {
         <section id="pengumuman" style={styles.section}><div style={styles.kicker}>INFORMASI</div><h2 style={styles.heading}>Pengumuman</h2>{announcements.length === 0 ? <p>Tidak ada pengumuman aktif.</p> : <div style={styles.announcements}>{announcements.map(n => <div key={n.id} style={styles.announcement}>{n.banner_image_url && <img src={n.banner_image_url} alt="" style={styles.banner}/>}<div><b>{n.title}</b><p>{n.content}</p></div></div>)}</div>}</section>
       </main></>}
 
-    <footer style={styles.footer}><div><img src={logoUrl} alt="Logo" style={styles.footerLogo}/><div><b>{profile?.name || "Yayasan Bina Tandang Nurul Falah"}</b><p>{profile?.short_description || ""}</p></div></div><div>{profile?.phone && <p>☎ {profile.phone}</p>}{profile?.email && <p>✉ {profile.email}</p>}</div></footer>
+    <footer style={styles.footer}><div><img src={logoUrl} alt="Logo Yayasan Bina Tandang Nurul Falah" style={styles.footerLogo}/><div><b>{profile?.name || "Yayasan Bina Tandang Nurul Falah"}</b><p>{profile?.short_description || ""}</p></div></div><div>{profile?.phone && <p>☎ {profile.phone}</p>}{profile?.email && <p>✉ {profile.email}</p>}</div></footer>
   </div>;
 }
 
@@ -60,7 +60,7 @@ const styles = {
   page:{minHeight:"100vh",background:"#f7f5ef",color:"#18322a",fontFamily:"system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"},
   header:{position:"sticky",top:0,zIndex:5,display:"flex",justifyContent:"space-between",alignItems:"center",gap:24,padding:"14px 6vw",background:"rgba(255,255,255,.96)",backdropFilter:"blur(12px)",borderBottom:"1px solid #e6e2d8"},
   brand:{border:0,background:"none",padding:0,fontWeight:800,fontSize:"1.05rem",color:"#18322a",cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:12},
-  headerLogo:{width:48,height:48,objectFit:"contain",flex:"0 0 auto"},
+  headerLogo:{width:56,height:56,objectFit:"contain",flex:"0 0 auto"},
   tagline:{display:"block",fontSize:".8rem",color:"#68766f",marginTop:4,fontWeight:400},
   nav:{marginLeft:18,color:"#315449",textDecoration:"none",fontSize:".9rem"},
   ticker:{padding:"10px 6vw",background:"#e8efe9",display:"flex",gap:10,alignItems:"center",fontSize:".9rem"},
@@ -71,7 +71,7 @@ const styles = {
   heroText:{fontSize:"1.1rem",lineHeight:1.7,maxWidth:700,opacity:.9},
   cta:{display:"inline-block",marginTop:16,padding:"12px 18px",borderRadius:999,background:"white",color:"#18322a",textDecoration:"none",fontWeight:700},
   heroLogo:{width:220,height:220,border:"1px solid rgba(255,255,255,.35)",borderRadius:28,display:"grid",placeItems:"center",background:"rgba(255,255,255,.04)"},
-  heroLogoImage:{width:"78%",height:"78%",objectFit:"contain"},
+  heroLogoImage:{width:"88%",height:"88%",objectFit:"contain"},
   main:{maxWidth:1100,margin:"auto",padding:"56px 6vw"},
   section:{padding:"50px 0",scrollMarginTop:90},
   heading:{fontSize:"clamp(1.8rem,3vw,2.7rem)",margin:"8px 0 18px"},
@@ -86,7 +86,7 @@ const styles = {
   announcement:{background:"white",border:"1px solid #e5e1d8",borderRadius:16,padding:18,display:"flex",gap:18},
   banner:{width:180,maxHeight:120,objectFit:"cover",borderRadius:12},
   footer:{padding:"45px 6vw",background:"#18322a",color:"white",display:"flex",justifyContent:"space-between",gap:30},
-  footerLogo:{width:64,height:64,objectFit:"contain",background:"white",borderRadius:16,padding:6,marginBottom:12},
+  footerLogo:{width:72,height:72,objectFit:"contain",background:"white",borderRadius:16,padding:6,marginBottom:12},
   articleTitle:{fontSize:"clamp(2rem,5vw,4rem)",lineHeight:1.05,margin:"10px 0"},
   subtitle:{fontSize:"1.15rem",color:"#68766f"},
   cover:{width:"100%",maxHeight:520,objectFit:"cover",borderRadius:24,margin:"25px 0"},

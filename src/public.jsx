@@ -37,7 +37,7 @@ function PublicSite() {
     <header style={styles.header}>
       <button onClick={home} style={styles.brand} aria-label="Beranda Yayasan">
         <img src={logoUrl} alt="Logo Yayasan Bina Tandang Nurul Falah" style={styles.headerLogo}/>
-        <span><b>{profile?.name || "Yayasan Bina Tandang Nurul Falah"}</b><small>{profile?.tagline || "Berkarya, mengabdi, dan memberi manfaat"}</small></span>
+        <span><b>{profile?.name || "Yayasan Bina Tandang Nurul Falah"}</b><small style={styles.tagline}>{profile?.tagline || "Berkarya, mengabdi, dan memberi manfaat"}</small></span>
       </button>
       <nav><a href="#profil" style={styles.nav}>Profil</a><a href="#artikel" style={styles.nav}>Artikel</a><a href="#pengumuman" style={styles.nav}>Pengumuman</a></nav>
     </header>
@@ -45,7 +45,7 @@ function PublicSite() {
     {announcements.length > 0 && <div style={styles.ticker}><strong>Pengumuman:</strong><span>{announcements[0].content || announcements[0].title}</span></div>}
 
     {selected ? <main style={styles.main}><button onClick={home} style={styles.back}>← Kembali</button><article><div style={styles.kicker}>ARTIKEL</div><h1 style={styles.articleTitle}>{selected.title}</h1>{selected.subtitle && <p style={styles.subtitle}>{selected.subtitle}</p>}{selected.cover_image_url && <img src={selected.cover_image_url} alt="" style={styles.cover}/>}<div style={styles.content}>{selected.content.split(/\n+/).map((p,i)=><p key={i}>{p}</p>)}</div>{selected.references_text && <div style={styles.references}><b>Referensi</b><p>{selected.references_text}</p></div>}</article></main> : <>
-      <section style={styles.hero}><div style={styles.heroInner}><div><div style={styles.kicker}>YAYASAN</div><h1 style={styles.heroTitle}>{profile?.name || "Yayasan Bina Tandang Nurul Falah"}</h1><p style={styles.heroText}>{profile?.short_description || "Membangun kebaikan melalui pelayanan dan kegiatan yang bermanfaat bagi masyarakat."}</p><a href="#profil" style={styles.cta}>Kenal Lebih Dekat →</a></div><div style={styles.heroLogo}><img src={logoUrl} alt="Logo Yayasan Bina Tandang Nurul Falah"/></div></div></section>
+      <section style={styles.hero}><div style={styles.heroInner}><div><div style={styles.kicker}>YAYASAN</div><h1 style={styles.heroTitle}>{profile?.name || "Yayasan Bina Tandang Nurul Falah"}</h1><p style={styles.heroText}>{profile?.short_description || "Membangun kebaikan melalui pelayanan dan kegiatan yang bermanfaat bagi masyarakat."}</p><a href="#profil" style={styles.cta}>Kenal Lebih Dekat →</a></div><div style={styles.heroLogo}><img src={logoUrl} alt="Logo Yayasan Bina Tandang Nurul Falah" style={styles.heroLogoImage}/></div></div></section>
       <main style={styles.main}>
         <section id="profil" style={styles.section}><div style={styles.kicker}>TENTANG KAMI</div><h2 style={styles.heading}>Profil Yayasan</h2><p>{profile?.full_description || profile?.short_description || "Profil yayasan akan ditampilkan di sini."}</p><div style={styles.grid2}><div><h3>Visi</h3><p>{profile?.vision || "—"}</p></div><div><h3>Misi</h3><p>{profile?.mission || "—"}</p></div></div>{profile?.address && <p><b>Alamat:</b> {profile.address}</p>}</section>
         <section id="artikel" style={styles.section}><div className="anchor"></div><div style={styles.kicker}>PUBLIKASI</div><h2 style={styles.heading}>Artikel Terbaru</h2>{articles.length === 0 ? <p>Belum ada artikel yang diterbitkan.</p> : <div style={styles.cards}>{articles.map(a => <article key={a.id} style={styles.card}>{a.cover_image_url && <img src={a.cover_image_url} alt="" style={styles.thumb}/>}<div style={styles.cardBody}><div style={styles.date}>{new Date(a.published_at || a.created_at).toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" })}</div><h3>{a.title}</h3>{a.subtitle && <p>{a.subtitle}</p>}<button onClick={() => goArticle(a)} style={styles.read}>Baca artikel →</button></div></article>)}</div>}</section>
@@ -61,7 +61,7 @@ const styles = {
   header:{position:"sticky",top:0,zIndex:5,display:"flex",justifyContent:"space-between",alignItems:"center",gap:24,padding:"14px 6vw",background:"rgba(255,255,255,.96)",backdropFilter:"blur(12px)",borderBottom:"1px solid #e6e2d8"},
   brand:{border:0,background:"none",padding:0,fontWeight:800,fontSize:"1.05rem",color:"#18322a",cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:12},
   headerLogo:{width:48,height:48,objectFit:"contain",flex:"0 0 auto"},
-  tagline:{fontSize:".8rem",color:"#68766f",marginTop:4},
+  tagline:{display:"block",fontSize:".8rem",color:"#68766f",marginTop:4,fontWeight:400},
   nav:{marginLeft:18,color:"#315449",textDecoration:"none",fontSize:".9rem"},
   ticker:{padding:"10px 6vw",background:"#e8efe9",display:"flex",gap:10,alignItems:"center",fontSize:".9rem"},
   hero:{background:"linear-gradient(135deg,#18322a,#315c4d)",color:"white"},
@@ -71,7 +71,7 @@ const styles = {
   heroText:{fontSize:"1.1rem",lineHeight:1.7,maxWidth:700,opacity:.9},
   cta:{display:"inline-block",marginTop:16,padding:"12px 18px",borderRadius:999,background:"white",color:"#18322a",textDecoration:"none",fontWeight:700},
   heroLogo:{width:220,height:220,border:"1px solid rgba(255,255,255,.35)",borderRadius:28,display:"grid",placeItems:"center",background:"rgba(255,255,255,.04)"},
-  heroLogo img:{},
+  heroLogoImage:{width:"78%",height:"78%",objectFit:"contain"},
   main:{maxWidth:1100,margin:"auto",padding:"56px 6vw"},
   section:{padding:"50px 0",scrollMarginTop:90},
   heading:{fontSize:"clamp(1.8rem,3vw,2.7rem)",margin:"8px 0 18px"},

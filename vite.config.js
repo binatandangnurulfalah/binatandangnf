@@ -1,25 +1,14 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { resolve } from 'node:path'
+import { resolve, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const remoteLogoUrl = 'https://msymqqryppgohsjmdbeo.supabase.co/storage/v1/object/public/LogoYayasan/LogoYayasan.svg?v=2'
-const localLogoUrl = '/logo-yayasan.svg'
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   // Relative asset paths work on both Cloudflare root domains and GitHub Pages subpaths.
   base: './',
-  plugins: [
-    react(),
-    {
-      name: 'use-local-yayasan-logo',
-      transform(code, id) {
-        if (id.includes('src/public.jsx')) {
-          return code.replaceAll(remoteLogoUrl, localLogoUrl)
-        }
-        return null
-      },
-    },
-  ],
+  plugins: [react()],
   build: {
     rollupOptions: {
       input: {

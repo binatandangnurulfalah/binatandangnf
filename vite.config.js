@@ -13,7 +13,7 @@ export default defineConfig({
     {
       name: 'use-local-yayasan-logo',
       transform(code, id) {
-        if (id.endsWith('/src/public.jsx')) {
+        if (id.replaceAll('\\\\', '/').endsWith('src/public.jsx')) {
           return code.replaceAll(remoteLogoUrl, localLogoUrl)
         }
         return null

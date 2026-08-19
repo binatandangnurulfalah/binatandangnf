@@ -24,6 +24,8 @@ function App() {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
+      if (event === "SIGNED_IN") { setMessage(""); }
+      if (event === "SIGNED_OUT") { setMessage(""); setRecoveryMode(false); }
       if (event === "PASSWORD_RECOVERY") { setRecoveryMode(true); setMessage(""); }
     });
     return () => subscription.unsubscribe();

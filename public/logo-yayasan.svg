@@ -1,19 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
   <title id="title">Logo Yayasan Bina Tandang Nurul Falah</title>
-  <desc id="desc">Emblem BTNF dengan bentuk buku, daun, dan kubah yang melambangkan ilmu, pertumbuhan, dan nilai keislaman.</desc>
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#18322a"/>
-      <stop offset="1" stop-color="#315c4d"/>
-    </linearGradient>
-  </defs>
-  <circle cx="256" cy="256" r="244" fill="white" stroke="#18322a" stroke-width="14"/>
-  <circle cx="256" cy="256" r="210" fill="url(#g)"/>
-  <path d="M256 128c-25-42-77-53-112-20 34 9 57 30 69 62 13-14 27-27 43-42z" fill="#dce9df"/>
-  <path d="M256 128c25-42 77-53 112-20-34 9-57 30-69 62-13-14-27-27-43-42z" fill="#f7f5ef"/>
-  <path d="M256 141v48" stroke="white" stroke-width="8" stroke-linecap="round"/>
-  <path d="M143 239c34-22 72-24 113 4 41-28 79-26 113-4v100c-36-22-73-20-113 7-40-27-77-29-113-7z" fill="#fff"/>
-  <path d="M256 243v104" stroke="#315c4d" stroke-width="7"/>
-  <path d="M161 254c27-13 57-11 87 9M351 254c-27-13-57-11-87 9" fill="none" stroke="#315c4d" stroke-width="6" stroke-linecap="round"/>
-  <text x="256" y="403" text-anchor="middle" fill="white" font-family="Arial,Helvetica,sans-serif" font-size="42" font-weight="800" letter-spacing="6">BTNF</text>
+  <desc id="desc">Logo Yayasan Bina Tandang Nurul Falah dari penyimpanan LogoYayasan di Supabase.</desc>
+  <image href="https://msymqqryppgohsjmdbeo.supabase.co/storage/v1/object/public/LogoYayasan/LogoYayasan.svg" x="0" y="0" width="512" height="512" preserveAspectRatio="xMidYMid meet"/>
 </svg>

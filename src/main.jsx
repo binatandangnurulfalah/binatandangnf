@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { createClient } from "@supabase/supabase-js";
 import "./style.css";
+import "./enhancements.css";
 
 const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
 const logoUrl = `${import.meta.env.BASE_URL}logo-yayasan.svg`;
@@ -107,3 +108,4 @@ function App() {
 }
 
 createRoot(document.getElementById("root")).render(<App />);
+

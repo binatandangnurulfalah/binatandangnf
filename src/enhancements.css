@@ -1,0 +1,30 @@
+.menu-toggle { display: none; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+.button-ghost { border: 1px solid rgba(255,255,255,.46); background: transparent; color: #fff; }
+.button-ghost:hover { background: rgba(255,255,255,.11); }
+.hero-metrics { width: min(1180px, calc(100% - 3rem)); display: grid; grid-template-columns: repeat(3, 1fr); margin: 0 auto; padding: 1.2rem 0; border-top: 1px solid rgba(255,255,255,.17); color: #fff; }
+.hero-metrics div { display: flex; align-items: baseline; gap: .55rem; padding: 0 1rem; border-left: 1px solid rgba(255,255,255,.17); }
+.hero-metrics div:first-child { padding-left: 0; border: 0; }
+.hero-metrics strong { font-family: "Playfair Display", Georgia, serif; font-size: 1.7rem; }
+.hero-metrics span { color: rgba(255,255,255,.68); font-size: .8rem; }
+.article-card-featured { grid-column: span 2; display: grid; grid-template-columns: 1.1fr .9fr; }
+.article-card-featured .article-thumbnail, .article-card-featured .article-placeholder { height: 100%; }
+.article-card-featured .article-card-body { align-self: center; }
+.article-card-featured h3 { font-size: 1.8rem; }
+.nav-contact { padding: .3rem .65rem; border: 1px solid var(--line); border-radius: .45rem; }
+.nav-contact:hover { border-color: var(--gold); }
+
+@media (max-width: 760px) {
+  .site-header-inner { position: relative; }
+  .menu-toggle { display: inline-flex; align-items: center; gap: .35rem; padding: .5rem .65rem; background: var(--sage); color: var(--forest); font-size: .8rem; }
+  .site-nav { display: none; position: absolute; top: calc(100% - .25rem); right: 0; left: 0; z-index: 15; padding: .65rem; border: 1px solid var(--line); border-radius: .75rem; background: var(--paper); box-shadow: var(--shadow); }
+  .site-nav.is-open { display: grid; gap: .15rem; }
+  .site-nav a { padding: .7rem; border-radius: .45rem; }
+  .site-nav a:hover { background: var(--sage); }
+  .hero-metrics { width: calc(100% - 2rem); grid-template-columns: 1fr; gap: .65rem; padding: 1.1rem 0; }
+  .hero-metrics div, .hero-metrics div:first-child { padding: 0; border: 0; }
+  .article-card-featured { grid-column: auto; display: block; }
+  .article-card-featured .article-thumbnail, .article-card-featured .article-placeholder { height: 190px; }
+  .article-card-featured h3 { font-size: 1.4rem; }
+}
+

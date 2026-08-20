@@ -40,10 +40,10 @@ const imageEditorPlugin = () => ({
 
     const uploadFunction = String.raw`async function upload(file,prefix,ratio="16:9",zoom=1,pan={x:0,y:0}){if(!file)return null;if(!imageTypes.includes(file.type)||file.size>12*1024*1024){setMessage("Foto harus JPG/PNG/WEBP/GIF dan maksimal 12 MB.");return null}setUploading(true);try{const cropped=await cropImage(file,ratio,zoom,pan),path=session.user.id+"/"+prefix+"-"+Date.now()+"-"+Math.random().toString(36).slice(2,7)+".webp",res=await supabase.storage.from("MediaArtikel").upload(path,cropped,{contentType:"image/webp",upsert:false});if(res.error)throw res.error;return supabase.storage.from("MediaArtikel").getPublicUrl(path).data.publicUrl}catch(e){setMessage(e.message||"Gagal upload foto");return null}finally{setUploading(false)}}`
 
-    source = source.replace(/async function cropImage[\\s\\S]*?\\n\\nfunction Preview/, cropImage + '\n\nfunction Preview')
-    source = source.replace(/function ImageField[\\s\\S]*?\\n\\nfunction GalleryUploader/, imageField + '\n\nfunction GalleryUploader')
-    source = source.replace(/function GalleryUploader[\\s\\S]*?\\n\\nfunction SitePreview/, galleryUploader + '\n\nfunction SitePreview')
-    source = source.replace(/async function upload\(file,prefix,ratio="16:9",zoom=1\)\\{[\\s\\S]*?\\n async function save\(/, uploadFunction + '\n async function save(')
+    source = source.replace(/async function cropImage[\s\S]*?\n\nfunction Preview/, cropImage + '\n\nfunction Preview')
+    source = source.replace(/function ImageField[\s\S]*?\n\nfunction GalleryUploader/, imageField + '\n\nfunction GalleryUploader')
+    source = source.replace(/function GalleryUploader[\s\S]*?\n\nfunction SitePreview/, galleryUploader + '\n\nfunction SitePreview')
+    source = source.replace(/async function upload\(file,prefix,ratio="16:9",zoom=1\)\{[\s\S]*?\n async function save\(/, uploadFunction + '\n async function save(')
     return { code: source, map: null }
   },
 })

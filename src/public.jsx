@@ -2,22 +2,21 @@ import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createClient } from '@supabase/supabase-js';
 import './styles.css';
-import { t, setLanguage, initI18n } from './lib/i18n.js';
 
 const db = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
 const logo = `${import.meta.env.BASE_URL}logo-yayasan.svg`;
 const money = n => n == null ? '' : new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
 
-// Navigation items with i18n keys
+// Navigation items
 const navItems = [
-  { id: 'profil', key: 'nav_about' },
-  { id: 'program', key: 'nav_programs' },
-  { id: 'pesantren', key: 'Pesantren' },
-  { id: 'pendidikan', key: 'nav_education' },
-  { id: 'koperasi', key: 'nav_coop' },
-  { id: 'kegiatan', key: 'nav_activities' },
-  { id: 'artikel', key: 'nav_articles' },
-  { id: 'kontak', key: 'nav_contact' }
+  { id: 'profil', label: 'Profil' },
+  { id: 'program', label: 'Program' },
+  { id: 'pesantren', label: 'Pesantren' },
+  { id: 'pendidikan', label: 'Pendidikan' },
+  { id: 'koperasi', label: 'Koperasi' },
+  { id: 'kegiatan', label: 'Kegiatan' },
+  { id: 'artikel', label: 'Artikel' },
+  { id: 'kontak', label: 'Kontak' }
 ];
 
 function App() {
@@ -27,12 +26,10 @@ function App() {
   const [active, setActive] = useState('home');
   const [search, setSearch] = useState('');
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
-  const [lang, setLang] = useState(() => localStorage.getItem('preferred_language') || 'id');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Initialize theme and language
+  // Initialize theme
   useEffect(() => {
-    initI18n();
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
@@ -48,12 +45,6 @@ function App() {
     localStorage.setItem('theme', newMode ? 'dark' : 'light');
     document.documentElement.setAttribute('data-theme', newMode ? 'dark' : 'light');
   }, [darkMode]);
-
-  // Change language
-  const changeLang = useCallback((newLang) => {
-    setLang(newLang);
-    setLanguage(newLang);
-  }, []);
 
   // Fetch data
   useEffect(() => {
@@ -115,34 +106,22 @@ function App() {
         <nav className="desktop-nav">
           {navItems.map(item => (
             <button key={item.id} onClick={() => go(item.id)}>
-              {t(item.key)}
+              {item.label}
             </button>
           ))}
           <button className="donate-btn" onClick={() => window.location.href = '#donasi'}>
-            {t('nav_donate')}
+            Donasi
           </button>
         </nav>
 
         {/* Controls */}
         <div className="controls">
-          {/* Language Selector */}
-          <select 
-            className="lang-select" 
-            value={lang} 
-            onChange={(e) => changeLang(e.target.value)}
-            aria-label={t('lang_select')}
-          >
-            <option value="id">🇮🇩 ID</option>
-            <option value="en">🇬🇧 EN</option>
-            <option value="ar">🇸🇦 AR</option>
-          </select>
-
           {/* Dark Mode Toggle */}
           <button 
             className="theme-toggle" 
             onClick={toggleDarkMode}
-            aria-label={t('dark_mode_toggle')}
-            title={t('dark_mode_toggle')}
+            aria-label="Ubah mode gelap/terang"
+            title="Ubah mode gelap/terang"
           >
             {darkMode ? '☀️' : '🌙'}
           </button>
@@ -151,7 +130,7 @@ function App() {
           <button 
             className={`mobile-menu-btn ${mobileMenuOpen ? 'active' : ''}`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={t('a11y_menu')}
+            aria-label="Buka menu"
             aria-expanded={mobileMenuOpen}
           >
             <span></span>
@@ -165,38 +144,38 @@ function App() {
           <nav className="mobile-nav">
             {navItems.map(item => (
               <button key={item.id} onClick={() => go(item.id)}>
-                {t(item.key)}
+                {item.label}
               </button>
             ))}
             <button className="donate-btn" onClick={() => go('donasi')}>
-              {t('nav_donate')}
+              Donasi
             </button>
           </nav>
         )}
       </header>
 
       {active === 'home' ? 
-        <Home d={d} go={go} logo={logo} t={t} /> : 
-        <Page active={active} d={d} p={p} go={go} search={search} setSearch={setSearch} articles={articles} logo={logo} t={t} />
+        <Home d={d} go={go} logo={logo} /> : 
+        <Page active={active} d={d} p={p} go={go} search={search} setSearch={setSearch} articles={articles} logo={logo} />
       }
 
       <footer id="kontak">
         <div>
           <img src={logo} alt={p.name || 'Logo Yayasan'} loading="lazy" />
-          <h3>{p.name || t('nav_home')}</h3>
+          <h3>{p.name || 'Yayasan Bina Tandang Nurul Falah'}</h3>
           <p>{p.short_description}</p>
         </div>
         <div>
-          <b>{t('nav_contact')}</b>
-          <p>{p.address || t('contact_address_placeholder')}</p>
+          <b>Kontak</b>
+          <p>{p.address || 'Alamat belum diatur'}</p>
           <p>{p.phone}</p>
           <p>{p.email}</p>
         </div>
         <div>
-          <b>{t('nav_programs')}</b>
-          <button onClick={() => go('pesantren')}>{t('Pesantren')}</button>
-          <button onClick={() => go('pendidikan')}>{t('nav_education')}</button>
-          <button onClick={() => go('koperasi')}>{t('nav_coop')}</button>
+          <b>Program</b>
+          <button onClick={() => go('pesantren')}>Pesantren</button>
+          <button onClick={() => go('pendidikan')}>Pendidikan</button>
+          <button onClick={() => go('koperasi')}>Koperasi</button>
         </div>
       </footer>
     </>

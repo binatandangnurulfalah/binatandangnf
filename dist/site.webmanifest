@@ -1,0 +1,17 @@
+{
+  "name": "Yayasan Bina Tandang Nurul Falah",
+  "short_name": "BTNF",
+  "description": "Website Yayasan Bina Tandang Nurul Falah",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f5ef",
+  "theme_color": "#18322a",
+  "icons": [
+    {
+      "src": "/logo-yayasan.svg?v=20260820-9",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

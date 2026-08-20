@@ -1,0 +1,27 @@
+{
+  "name": "Yayasan Bina Tandang Nurul Falah",
+  "short_name": "Bina Tandang NF",
+  "description": "Website resmi Yayasan Bina Tandang Nurul Falah - Membangun generasi Qur'ani yang berakhlak mulia",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#064e3b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo-yayasan.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo-yayasan.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "nonprofit"],
+  "lang": "id",
+  "dir": "ltr"
+}

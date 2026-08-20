@@ -1,7 +1,7 @@
 import React,{useEffect,useMemo,useState}from'react';
 import{createRoot}from'react-dom/client';
 import{createClient}from'@supabase/supabase-js';
-import'./foundation.css';
+import'./styles.css';
 const db=createClient(import.meta.env.VITE_SUPABASE_URL,import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY),logo=`${import.meta.env.BASE_URL}logo-yayasan.svg`;
 const money=n=>n==null?'':new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n);
 function App(){const[d,setD]=useState({profile:{},units:[],profiles:[],programs:[],education:[],products:[],articles:[],events:[]}),[loading,setLoading]=useState(true),[error,setError]=useState(''),[active,setActive]=useState('home'),[search,setSearch]=useState('');
